@@ -17,9 +17,9 @@ To run the simulation simply run:
 
 > python calculate_wish_stats.py
 
-The script will output Tables containing Tables containing both the probabilities of getting exactly constellation N
-and at least constellation N after a certain number of pulls. For example, the probabilities of getting a specific 
-constellation after N pulls are:
+The script will output Tables containing both the probabilities of getting exactly constellation N
+and at least constellation N after a certain number of pulls. For example, the probabilities of getting exactly
+constellation X for the banner 5* after N pulls are:
 
 5* - Probability of getting exactly constellation X
 
