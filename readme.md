@@ -6,7 +6,7 @@ We calculate the probability of ending up at an exact constellation for one spec
 contains the average number of drawn copies for a specific character after N pulls.
 The simulation always assumes that we start from 0 pity without a guaranteed 50/50 win.
 
-The individual rates are taken from [Hoyolab](#https://www.hoyolab.com/article/497840). In particular, the average
+The individual rates are taken from [Hoyolab](https://www.hoyolab.com/article/497840). In particular, the average
 chance of getting a 5* character before entering soft-pity at pull 74 is always 0.051. Starting at pull 74, soft pity
 starts and linearly increases the chances of getting a 5* at each pull by 6% until we get a guaranteed 5* at 90 pulls.
 For 4* characters, a similar soft pity system starts at 9 pulls after not getting at least a single 4* or 5* and results
