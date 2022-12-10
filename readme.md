@@ -1,4 +1,4 @@
-#Genshin Impact Gatcha Statistics
+# Genshin Impact Gatcha Statistics
 
 In this repo, we use a Monte Carlo Simulation in Numpy to estimate various statistics for Genshin Impact's Gatcha system. 
 We calculate the probability of ending up at an exact constellation for one specific banner 4* or 5* after N pulls 
