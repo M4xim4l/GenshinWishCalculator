@@ -2,7 +2,7 @@
 
 In this repo, we use a Monte Carlo Simulation in Numpy to estimate various statistics for Genshin Impact's Gatcha system. 
 We calculate the probability of ending up at an exact constellation for one specific banner 4* or 5* after N pulls 
-(1st column) and also the probability of getting at least constellation X after N pulls (2nd column). The third column
+(1st column in plot) and also the probability of getting at least constellation X after N pulls (2nd column). The third column
 contains the average number of drawn copies for a specific character after N pulls.
 The simulation always assumes that we start from 0 pity without a guaranteed 50/50 win.
 
