@@ -1,10 +1,11 @@
 import argparse
 import numpy as np
+import os
 from tqdm import trange
 import seaborn as sns
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
-
+import pathlib
 
 #https://gist.github.com/dbzm/68256c86c60d70072576
 def to_markdown_table(pt):
@@ -44,15 +45,13 @@ p_four_star_wanted = 1/3
 
 def calculate_five_star_probability(last_five_star, t):
     d_last_five = t - last_five_star
-    d_last_five[last_five_star == -1] = t
-    pity_factor = np.maximum(d_last_five - (five_star_pity_start - 1), 0)
+    pity_factor = np.maximum(d_last_five - (five_star_pity_start - 2), 0)
     p_five_star = p_base_five_star + pity_factor * five_star_pity_slope
     return p_five_star
 
 def calculate_four_star_probability(last_four_star, t):
     d_last_four = t - last_four_star
-    d_last_four[last_four_star == -1] = t
-    pity_factor = np.maximum(d_last_four - (four_star_pity_start - 1), 0)
+    pity_factor = np.maximum(d_last_four - (four_star_pity_start - 2), 0)
     p_four_star = p_base_four_star + pity_factor * four_star_pity_slope
     return p_four_star
 
@@ -99,7 +98,6 @@ def calculate_asymmetric_conf_interval(observations, data_means, confidence=0.95
 
 
 def calculate_wish_stats(trials, chain_length, table_step):
-    t = 0
     loot = np.zeros((trials, chain_length), dtype=int)
 
     last_five_star = -np.ones(trials, dtype=int)
@@ -113,10 +111,10 @@ def calculate_wish_stats(trials, chain_length, table_step):
         t_loot_distributed = np.zeros(trials, dtype=bool)
 
         #first distribute 5 stars
-        t_rngs_five = np.random.rand(trials)
+        t_rngs_num_stars = np.random.rand(trials)
         p_five_star = calculate_five_star_probability(last_five_star, t)
 
-        got_five = t_rngs_five < p_five_star
+        got_five = t_rngs_num_stars < p_five_star
         five_is_banner = np.random.rand(np.sum(got_five)) < p_five_star_banner
         five_is_banner = five_is_banner | five_star_banner_guarantee[got_five]
 
@@ -128,10 +126,9 @@ def calculate_wish_stats(trials, chain_length, table_step):
         last_five_star[got_five] = t
 
         #next distribute 4 stars
-        t_rngs_four = np.random.rand(trials)
         p_four_star = calculate_four_star_probability(last_four_star, t)
 
-        got_four = (t_rngs_four < p_four_star) & ~t_loot_distributed
+        got_four = (t_rngs_num_stars < (p_five_star + p_four_star)) & ~t_loot_distributed
         four_is_banner = np.random.rand(np.sum(got_four)) < p_four_star_banner
         four_is_banner = four_is_banner | four_star_banner_guarantee[got_four]
         four_is_banner_and_wanted = np.random.rand(np.sum(got_four)) < p_four_star_wanted
@@ -176,6 +173,9 @@ def calculate_wish_stats(trials, chain_length, table_step):
     table_idcs = np.arange(table_step, chain_length + table_step, table_step, dtype=int) - 1
     table_idcs[-1] = chain_length - 1
 
+    results_dir = 'results'
+    pathlib.Path(results_dir).mkdir(parents=True, exist_ok=True)
+
     print('Generating tables...')
     for name in ['4*', '5*']:
         for data_dict, table_name in zip([exact_constellation_probabilities, at_least_constellation_probabilities],
@@ -190,15 +190,21 @@ def calculate_wish_stats(trials, chain_length, table_step):
                 row = [table_idx + 1, ] + data[:, table_idx].tolist()
                 table.add_row(row)
 
-            print(f'{name} - {table_name}')
-            print(table)
-            print('\n\n')
+            table_filename = f'{name}_{table_name}.txt'.replace(' ', '_').replace('*', '').lower()
+            table_filepath = os.path.join(results_dir, table_filename)
+            with open(table_filepath, 'w') as f:
+                f.write(f'{name} - {table_name}\n')
+                f.write(str(table))
 
             #only used for readme.md
-            #print(to_markdown_table(table))
-            #print('\n')
+            print(f'{name} - {table_name}')
+            print(to_markdown_table(table))
+            print('\n\n')
+
 
     print('Generating plot...')
+
+
     scale_factor = 4
     fig, axs = plt.subplots(2, 3, figsize=(3 * 3 * scale_factor, 3 * scale_factor))
     for i, name in enumerate(['4*', '5*']):
@@ -236,7 +242,7 @@ def calculate_wish_stats(trials, chain_length, table_step):
         ax.set_ylabel('Copies')
 
     plt.tight_layout()
-    plt.savefig('simulation_results.png')
+    plt.savefig(os.path.join(results_dir, 'simulation_results.png'))
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Parse arguments', prefix_chars='-')
